@@ -2,7 +2,7 @@ import pygame
 from pygame import mixer, key
 from random import randint
 
-
+pygame.font.init()
 pygame.init()
 mixer.init()
 clock = pygame.time.Clock()
@@ -43,11 +43,37 @@ class Enemy(GameSprite):
     def __init__(self, image_path, x, y, w, h):
         super().__init__(image_path, x, y, w, h)
         self.speed = 3
-    
+
     def update(self):
         self.rect.y += self.speed
+        if self.rect.y > 500:
+            self.rect.x = randint(0, 700)
+            self.rect.y = randint(-100, 0)
+            sc.lost += 1
 
 
+class Label:
+    def __init__(self, text, score, color, x, y):
+        self.text = text
+        self.score = score
+        self.color = color
+        self.x = x
+        self.y = y
+        self.font = pygame.font.Font(None, 36)
+
+    def draw(self):
+        image = self.font.render(self.text + str(self.score), True, self.color)
+        screen.blit(image, (self.x, self.y))
+
+
+class Scores:
+    lost = 0
+    points = 0
+
+
+sc = Scores()
+points_label = Label('Очки: ', 0, (255, 255, 255), 20, 10)
+lost_label = Label('Пропущено: ', 0, (255, 255, 255), 20, 40)
 bg = GameSprite('galaxy.jpg', 0, 0, 700, 500)
 player = Player('rocket.png', 325, 400, 60, 90)
 enemies = pygame.sprite.Group()
@@ -56,7 +82,7 @@ for i in range(5):
     y = randint(0, 200)
     enemy = Enemy('ufo.png', x, y, 100, 70)
     enemies.add(enemy)
-    
+
 run = True
 mixer.music.play()
 while run:
@@ -70,5 +96,7 @@ while run:
     enemies.update()
     enemies.draw(screen)
     player.draw()
+    points_label.draw()
+    lost_label.draw()
     pygame.display.update()
     clock.tick(30)
