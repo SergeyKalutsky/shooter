@@ -1,5 +1,6 @@
 import pygame
 from pygame import mixer, key
+from random import randint
 
 
 pygame.init()
@@ -38,8 +39,24 @@ class Player(GameSprite):
         pass
 
 
+class Enemy(GameSprite):
+    def __init__(self, image_path, x, y, w, h):
+        super().__init__(image_path, x, y, w, h)
+        self.speed = 3
+    
+    def update(self):
+        self.rect.y += self.speed
+
+
 bg = GameSprite('galaxy.jpg', 0, 0, 700, 500)
 player = Player('rocket.png', 325, 400, 60, 90)
+enemies = pygame.sprite.Group()
+for i in range(5):
+    x = randint(0, 700)
+    y = randint(0, 200)
+    enemy = Enemy('ufo.png', x, y, 100, 70)
+    enemies.add(enemy)
+    
 run = True
 mixer.music.play()
 while run:
@@ -50,6 +67,8 @@ while run:
 
     bg.draw()
     player.update()
+    enemies.update()
+    enemies.draw(screen)
     player.draw()
     pygame.display.update()
-    clock.tick(60)
+    clock.tick(30)
