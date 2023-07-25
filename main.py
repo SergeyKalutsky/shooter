@@ -49,7 +49,7 @@ class Enemy(GameSprite):
         if self.rect.y > 500:
             self.rect.x = randint(0, 700)
             self.rect.y = randint(-100, 0)
-            sc.lost += 1
+            lost_label.score += 1
 
 
 class Label:
@@ -66,12 +66,6 @@ class Label:
         screen.blit(image, (self.x, self.y))
 
 
-class Scores:
-    lost = 0
-    points = 0
-
-
-sc = Scores()
 points_label = Label('Очки: ', 0, (255, 255, 255), 20, 10)
 lost_label = Label('Пропущено: ', 0, (255, 255, 255), 20, 40)
 bg = GameSprite('galaxy.jpg', 0, 0, 700, 500)
