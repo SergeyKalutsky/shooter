@@ -66,10 +66,20 @@ class Label:
         screen.blit(image, (self.x, self.y))
 
 
+class Bullet(GameSprite):
+    def __init__(self, image_path, x, y, w, h):
+        super().__init__(image_path, x, y, w, h)
+        self.speed = 5
+
+    def update(self):
+        self.rect.y -= self.speed
+
+
 points_label = Label('Очки: ', 0, (255, 255, 255), 20, 10)
 lost_label = Label('Пропущено: ', 0, (255, 255, 255), 20, 40)
 bg = GameSprite('galaxy.jpg', 0, 0, 700, 500)
 player = Player('rocket.png', 325, 400, 60, 90)
+bullets = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 for i in range(5):
     x = randint(0, 700)
@@ -77,6 +87,7 @@ for i in range(5):
     enemy = Enemy('ufo.png', x, y, 100, 70)
     enemies.add(enemy)
 
+cooldown = 0
 run = True
 mixer.music.play()
 while run:
@@ -84,9 +95,17 @@ while run:
         if event.type == pygame.QUIT:
             run = False
             pygame.quit()
-
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE and cooldown <= 0:
+                bullet = Bullet('bullet.png', player.rect.x+23, player.rect.y, 10, 20)
+                bullets.add(bullet)
+                cooldown = 30
+                
+    cooldown -= 1
     bg.draw()
     player.update()
+    bullets.update()
+    bullets.draw(screen)
     enemies.update()
     enemies.draw(screen)
     player.draw()
