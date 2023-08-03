@@ -5,10 +5,12 @@ from random import randint
 pygame.font.init()
 pygame.init()
 mixer.init()
+pygame.font.init()
+font = pygame.font.Font(None, 80)
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((700, 500))
 mixer.music.load('space.ogg')
-
+shoot_sound = pygame.mixer.Sound("fire.ogg")
 
 class GameSprite(pygame.sprite.Sprite):
     def __init__(self, image_path, x, y, w, h):
@@ -45,6 +47,14 @@ class Enemy(GameSprite):
         self.speed = 3
 
     def update(self):
+        bullets_collided = pygame.sprite.spritecollide(self, bullets, False)
+        if bullets_collided:
+            for bullet in bullets_collided:
+                bullet.kill()
+            self.rect.x = randint(0, 700)
+            self.rect.y = randint(-200, 0)
+            points_label.score += 1
+            
         self.rect.y += self.speed
         if self.rect.y > 500:
             self.rect.x = randint(0, 700)
@@ -74,7 +84,7 @@ class Bullet(GameSprite):
     def update(self):
         self.rect.y -= self.speed
 
-
+win_text = font.render('WIN!', True, (0, 255, 0))
 points_label = Label('Очки: ', 0, (255, 255, 255), 20, 10)
 lost_label = Label('Пропущено: ', 0, (255, 255, 255), 20, 40)
 bg = GameSprite('galaxy.jpg', 0, 0, 700, 500)
@@ -90,6 +100,7 @@ for i in range(5):
 cooldown = 0
 run = True
 mixer.music.play()
+state = 'game'
 while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -97,19 +108,27 @@ while run:
             pygame.quit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and cooldown <= 0:
+                pygame.mixer.Sound.play(shoot_sound)
                 bullet = Bullet('bullet.png', player.rect.x+23, player.rect.y, 10, 20)
                 bullets.add(bullet)
-                cooldown = 30
-                
-    cooldown -= 1
+                cooldown = 15
+    
+    if state == 'game':            
+        cooldown -= 1
+        player.update()
+        bullets.update()
+        enemies.update()
+    
+    if points_label.score == 10:
+        state = 'win'
+        
     bg.draw()
-    player.update()
-    bullets.update()
     bullets.draw(screen)
-    enemies.update()
     enemies.draw(screen)
     player.draw()
     points_label.draw()
     lost_label.draw()
+    if state == 'win':
+        screen.blit(win_text, (300, 200))
     pygame.display.update()
     clock.tick(30)
